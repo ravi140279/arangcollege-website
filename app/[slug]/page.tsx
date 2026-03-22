@@ -1,17 +1,20 @@
 import { notFound } from "next/navigation";
 import { PageRenderer } from "@/components/page-renderer";
-import { allPageSlugs, pages } from "@/lib/site-data";
+import { getAllPageSlugs, getAllPages } from "@/lib/site-data";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
+export const dynamicParams = true;
+
 export function generateStaticParams() {
-  return allPageSlugs.map((slug) => ({ slug }));
+  return getAllPageSlugs().map((slug) => ({ slug }));
 }
 
 export default async function DynamicPage({ params }: Props) {
   const { slug } = await params;
+  const pages = getAllPages();
   const page = pages[slug];
 
   if (!page) {
