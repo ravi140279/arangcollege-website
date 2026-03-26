@@ -90,6 +90,8 @@ export async function POST(req: NextRequest) {
     student_id: pendingOrder.student_id,
     student_name: pendingOrder.student_name,
     father_name: pendingOrder.father_name,
+    gender: pendingOrder.gender,
+    caste: pendingOrder.caste,
     class_name: pendingOrder.class_name,
     student_type: pendingOrder.student_type,
     semester_year: pendingOrder.semester_year,

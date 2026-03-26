@@ -28,6 +28,8 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
     ["Student ID", payment.student_id],
     ["Student Name", payment.student_name],
     ["Father's Name", payment.father_name],
+    ["Gender", payment.gender],
+    ["Caste", payment.caste],
     ["Class", payment.class_name],
     ["Student Type", payment.student_type],
     ["Semester / Year", payment.semester_year],

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import {
   CLASS_OPTIONS,
   STUDENT_TYPE_OPTIONS,
+  GENDER_OPTIONS,
+  CASTE_OPTIONS,
   SEMESTER_YEAR_OPTIONS,
   getFeeCatalog,
   getPaytmCheckoutJsUrl,
@@ -27,6 +29,8 @@ export default function FeesPage() {
         <FeePaymentForm
           feeCatalog={feeCatalog}
           classOptions={[...CLASS_OPTIONS]}
+          genderOptions={[...GENDER_OPTIONS]}
+          casteOptions={[...CASTE_OPTIONS]}
           studentTypeOptions={[...STUDENT_TYPE_OPTIONS]}
           semesterYearOptions={[...SEMESTER_YEAR_OPTIONS]}
           currency={currency}

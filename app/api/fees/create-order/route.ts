@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   CLASS_OPTIONS,
   STUDENT_TYPE_OPTIONS,
+  GENDER_OPTIONS,
+  CASTE_OPTIONS,
   SEMESTER_YEAR_OPTIONS,
   getFeeCatalog,
   getPaytmConfig,
@@ -33,6 +35,8 @@ export async function POST(req: NextRequest) {
     "student_id",
     "student_name",
     "father_name",
+    "gender",
+    "caste",
     "class_name",
     "student_type",
     "semester_year",
@@ -47,6 +51,22 @@ export async function POST(req: NextRequest) {
   if (missing.length > 0) {
     return NextResponse.json(
       { error: `Missing fields: ${missing.join(", ")}` },
+      { status: 400 }
+    );
+  }
+
+  const gender = String(payload.gender).trim();
+  if (!(GENDER_OPTIONS as readonly string[]).includes(gender)) {
+    return NextResponse.json(
+      { error: "Invalid gender selected." },
+      { status: 400 }
+    );
+  }
+
+  const caste = String(payload.caste).trim();
+  if (!(CASTE_OPTIONS as readonly string[]).includes(caste)) {
+    return NextResponse.json(
+      { error: "Invalid caste selected." },
       { status: 400 }
     );
   }
@@ -116,6 +136,8 @@ export async function POST(req: NextRequest) {
     student_id: String(payload.student_id).trim(),
     student_name: String(payload.student_name).trim(),
     father_name: String(payload.father_name).trim(),
+    gender,
+    caste,
     class_name: className,
     student_type: studentType,
     semester_year: semesterYear,

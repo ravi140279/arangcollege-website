@@ -36,6 +36,10 @@ CLASS_OPTIONS = [
 
 STUDENT_TYPE_OPTIONS = ["Regular", "Private"]
 
+GENDER_OPTIONS = ["Male", "Female"]
+
+CASTE_OPTIONS = ["General", "SC", "ST", "OBC"]
+
 SEMESTER_YEAR_OPTIONS = [
     "1st Semester",
     "2nd Semester",
@@ -124,6 +128,22 @@ def is_valid_student_type(student_type: str) -> bool:
     return student_type in STUDENT_TYPE_OPTIONS
 
 
+def get_gender_options() -> list[str]:
+    return GENDER_OPTIONS.copy()
+
+
+def is_valid_gender(gender: str) -> bool:
+    return gender in GENDER_OPTIONS
+
+
+def get_caste_options() -> list[str]:
+    return CASTE_OPTIONS.copy()
+
+
+def is_valid_caste(caste: str) -> bool:
+    return caste in CASTE_OPTIONS
+
+
 def is_valid_mobile_number(mobile_number: str) -> bool:
     return mobile_number.isdigit() and len(mobile_number) == 10
 
@@ -155,6 +175,8 @@ def init_db() -> None:
                 student_id TEXT NOT NULL,
                 student_name TEXT NOT NULL,
                 father_name TEXT NOT NULL,
+                gender TEXT NOT NULL,
+                caste TEXT NOT NULL,
                 class_name TEXT NOT NULL,
                 student_type TEXT NOT NULL,
                 semester_year TEXT NOT NULL,
@@ -180,6 +202,8 @@ def init_db() -> None:
                 student_id TEXT NOT NULL,
                 student_name TEXT NOT NULL,
                 father_name TEXT NOT NULL,
+                gender TEXT NOT NULL,
+                caste TEXT NOT NULL,
                 class_name TEXT NOT NULL,
                 student_type TEXT NOT NULL,
                 semester_year TEXT NOT NULL,
@@ -194,10 +218,14 @@ def init_db() -> None:
             """
         )
         ensure_column_exists(connection, "payments", "father_name")
+        ensure_column_exists(connection, "payments", "gender")
+        ensure_column_exists(connection, "payments", "caste")
         ensure_column_exists(connection, "payments", "class_name")
         ensure_column_exists(connection, "payments", "student_type")
         ensure_column_exists(connection, "payments", "semester_year")
         ensure_column_exists(connection, "pending_orders", "father_name")
+        ensure_column_exists(connection, "pending_orders", "gender")
+        ensure_column_exists(connection, "pending_orders", "caste")
         ensure_column_exists(connection, "pending_orders", "class_name")
         ensure_column_exists(connection, "pending_orders", "student_type")
         ensure_column_exists(connection, "pending_orders", "semester_year")
@@ -211,6 +239,8 @@ def record_payment(payment_data: dict[str, Any]) -> None:
                 student_id,
                 student_name,
                 father_name,
+                gender,
+                caste,
                 class_name,
                 student_type,
                 semester_year,
@@ -226,12 +256,14 @@ def record_payment(payment_data: dict[str, Any]) -> None:
                 status,
                 created_at,
                 raw_payload
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 payment_data["student_id"],
                 payment_data["student_name"],
                 payment_data["father_name"],
+                payment_data["gender"],
+                payment_data["caste"],
                 payment_data["class_name"],
                 payment_data["student_type"],
                 payment_data["semester_year"],
@@ -266,6 +298,8 @@ def upsert_pending_order(order_data: dict[str, Any]) -> None:
                 student_id,
                 student_name,
                 father_name,
+                gender,
+                caste,
                 class_name,
                 student_type,
                 semester_year,
@@ -276,11 +310,13 @@ def upsert_pending_order(order_data: dict[str, Any]) -> None:
                 amount_rupees,
                 currency,
                 created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(order_id) DO UPDATE SET
                 student_id=excluded.student_id,
                 student_name=excluded.student_name,
                 father_name=excluded.father_name,
+                gender=excluded.gender,
+                caste=excluded.caste,
                 class_name=excluded.class_name,
                 student_type=excluded.student_type,
                 semester_year=excluded.semester_year,
@@ -297,6 +333,8 @@ def upsert_pending_order(order_data: dict[str, Any]) -> None:
                 order_data["student_id"],
                 order_data["student_name"],
                 order_data["father_name"],
+                order_data["gender"],
+                order_data["caste"],
                 order_data["class_name"],
                 order_data["student_type"],
                 order_data["semester_year"],
@@ -334,6 +372,8 @@ def index() -> str:
             "COLLEGE_ACCOUNT_LABEL", "State Bank of India Current Account"
         ),
         class_options=get_class_options(),
+        gender_options=get_gender_options(),
+        caste_options=get_caste_options(),
         student_type_options=get_student_type_options(),
         semester_year_options=get_semester_year_options(),
         fee_catalog=fee_catalog,
@@ -351,6 +391,8 @@ def create_order() -> Any:
         "student_id",
         "student_name",
         "father_name",
+        "gender",
+        "caste",
         "class_name",
         "student_type",
         "semester_year",
@@ -363,6 +405,14 @@ def create_order() -> Any:
         return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
 
     father_name = str(payload["father_name"]).strip()
+
+    gender = str(payload["gender"]).strip()
+    if not is_valid_gender(gender):
+        return jsonify({"error": "Invalid gender selected."}), 400
+
+    caste = str(payload["caste"]).strip()
+    if not is_valid_caste(caste):
+        return jsonify({"error": "Invalid caste selected."}), 400
 
     class_name = str(payload["class_name"]).strip()
     if not is_valid_class_name(class_name):
@@ -400,6 +450,8 @@ def create_order() -> Any:
         "student_id": str(payload["student_id"]).strip(),
         "student_name": str(payload["student_name"]).strip(),
         "father_name": father_name,
+        "gender": gender,
+        "caste": caste,
         "class_name": class_name,
         "student_type": student_type,
         "semester_year": semester_year,
@@ -522,6 +574,8 @@ def payment_callback() -> Any:
         "student_id": pending_order["student_id"],
         "student_name": pending_order["student_name"],
         "father_name": pending_order["father_name"],
+        "gender": pending_order["gender"],
+        "caste": pending_order["caste"],
         "class_name": pending_order["class_name"],
         "student_type": pending_order["student_type"],
         "semester_year": pending_order["semester_year"],

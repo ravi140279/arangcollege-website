@@ -83,6 +83,17 @@ export default function AdminDashboard() {
           {/* Quick actions */}
           <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Link
+              href="/admin/fees"
+              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-md transition"
+            >
+              <h3 className="font-serif text-lg font-bold text-teal-950">
+                Fee Management
+              </h3>
+              <p className="mt-1 text-sm text-slate-600">
+                Review collections and export the payment register
+              </p>
+            </Link>
+            <Link
               href="/admin/pages"
               className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-md transition"
             >

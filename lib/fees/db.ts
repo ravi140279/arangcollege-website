@@ -9,6 +9,18 @@ function openDb(): Database.Database {
   return db;
 }
 
+function ensureColumnExists(db: Database.Database, tableName: string, columnName: string): void {
+  const columns = db
+    .prepare(`PRAGMA table_info(${tableName})`)
+    .all() as Array<{ name: string }>;
+
+  if (!columns.some((column) => column.name === columnName)) {
+    db.exec(
+      `ALTER TABLE ${tableName} ADD COLUMN ${columnName} TEXT NOT NULL DEFAULT ''`
+    );
+  }
+}
+
 function initDb(): void {
   const db = openDb();
   db.exec(`
@@ -17,6 +29,8 @@ function initDb(): void {
       student_id TEXT NOT NULL,
       student_name TEXT NOT NULL,
       father_name TEXT NOT NULL DEFAULT '',
+      gender TEXT NOT NULL DEFAULT '',
+      caste TEXT NOT NULL DEFAULT '',
       class_name TEXT NOT NULL DEFAULT '',
       student_type TEXT NOT NULL DEFAULT '',
       semester_year TEXT NOT NULL DEFAULT '',
@@ -39,6 +53,8 @@ function initDb(): void {
       student_id TEXT NOT NULL,
       student_name TEXT NOT NULL,
       father_name TEXT NOT NULL DEFAULT '',
+      gender TEXT NOT NULL DEFAULT '',
+      caste TEXT NOT NULL DEFAULT '',
       class_name TEXT NOT NULL DEFAULT '',
       student_type TEXT NOT NULL DEFAULT '',
       semester_year TEXT NOT NULL DEFAULT '',
@@ -51,6 +67,19 @@ function initDb(): void {
       created_at TEXT NOT NULL
     );
   `);
+
+  ensureColumnExists(db, "payments", "father_name");
+  ensureColumnExists(db, "payments", "gender");
+  ensureColumnExists(db, "payments", "caste");
+  ensureColumnExists(db, "payments", "class_name");
+  ensureColumnExists(db, "payments", "student_type");
+  ensureColumnExists(db, "payments", "semester_year");
+  ensureColumnExists(db, "pending_orders", "father_name");
+  ensureColumnExists(db, "pending_orders", "gender");
+  ensureColumnExists(db, "pending_orders", "caste");
+  ensureColumnExists(db, "pending_orders", "class_name");
+  ensureColumnExists(db, "pending_orders", "student_type");
+  ensureColumnExists(db, "pending_orders", "semester_year");
   db.close();
 }
 
@@ -62,6 +91,8 @@ export type PendingOrder = {
   student_id: string;
   student_name: string;
   father_name: string;
+  gender: string;
+  caste: string;
   class_name: string;
   student_type: string;
   semester_year: string;
@@ -86,18 +117,20 @@ export function upsertPendingOrder(order: PendingOrder): void {
   const db = openDb();
   db.prepare(`
     INSERT INTO pending_orders (
-      order_id, student_id, student_name, father_name, class_name,
-      student_type, semester_year, email, phone, fee_type, fee_label,
+      order_id, student_id, student_name, father_name, gender, caste,
+      class_name, student_type, semester_year, email, phone, fee_type, fee_label,
       amount_rupees, currency, created_at
     ) VALUES (
-      @order_id, @student_id, @student_name, @father_name, @class_name,
-      @student_type, @semester_year, @email, @phone, @fee_type, @fee_label,
+      @order_id, @student_id, @student_name, @father_name, @gender, @caste,
+      @class_name, @student_type, @semester_year, @email, @phone, @fee_type, @fee_label,
       @amount_rupees, @currency, @created_at
     )
     ON CONFLICT(order_id) DO UPDATE SET
       student_id = excluded.student_id,
       student_name = excluded.student_name,
       father_name = excluded.father_name,
+      gender = excluded.gender,
+      caste = excluded.caste,
       class_name = excluded.class_name,
       student_type = excluded.student_type,
       semester_year = excluded.semester_year,
@@ -131,13 +164,15 @@ export function recordPayment(payment: Omit<PaymentRecord, "id">): void {
   const db = openDb();
   db.prepare(`
     INSERT INTO payments (
-      student_id, student_name, father_name, class_name, student_type,
-      semester_year, email, phone, fee_type, fee_label, amount_rupees,
-      currency, order_id, payment_id, signature, status, created_at, raw_payload
+      student_id, student_name, father_name, gender, caste, class_name,
+      student_type, semester_year, email, phone, fee_type, fee_label,
+      amount_rupees, currency, order_id, payment_id, signature, status,
+      created_at, raw_payload
     ) VALUES (
-      @student_id, @student_name, @father_name, @class_name, @student_type,
-      @semester_year, @email, @phone, @fee_type, @fee_label, @amount_rupees,
-      @currency, @order_id, @payment_id, @signature, @status, @created_at, @raw_payload
+      @student_id, @student_name, @father_name, @gender, @caste, @class_name,
+      @student_type, @semester_year, @email, @phone, @fee_type, @fee_label,
+      @amount_rupees, @currency, @order_id, @payment_id, @signature, @status,
+      @created_at, @raw_payload
     )
   `).run(payment);
   db.close();

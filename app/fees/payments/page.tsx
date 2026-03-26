@@ -29,12 +29,22 @@ export default function PaymentsPage() {
                 {collegeName}
               </h1>
             </div>
-            <Link
-              href="/fees"
-              className="rounded-lg border border-primary-800 px-4 py-2 text-sm font-semibold text-primary-800 hover:bg-primary-50"
-            >
-              ← Back to payment form
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/api/fees/payments/export"
+                prefetch={false}
+                download
+                className="rounded-lg bg-primary-900 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-800"
+              >
+                Download CSV
+              </Link>
+              <Link
+                href="/fees"
+                className="rounded-lg border border-primary-800 px-4 py-2 text-sm font-semibold text-primary-800 hover:bg-primary-50"
+              >
+                ← Back to payment form
+              </Link>
+            </div>
           </div>
 
           {payments.length > 0 ? (
@@ -47,6 +57,8 @@ export default function PaymentsPage() {
                       "Student ID",
                       "Name",
                       "Father's Name",
+                      "Gender",
+                      "Caste",
                       "Class",
                       "Student Type",
                       "Semester / Year",
@@ -85,6 +97,12 @@ export default function PaymentsPage() {
                       </td>
                       <td className="px-3 py-3 text-slate-700">
                         {p.father_name}
+                      </td>
+                      <td className="px-3 py-3 text-slate-700">
+                        {p.gender}
+                      </td>
+                      <td className="px-3 py-3 text-slate-700">
+                        {p.caste}
                       </td>
                       <td className="px-3 py-3 text-slate-700">
                         {p.class_name}

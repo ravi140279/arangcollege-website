@@ -7,6 +7,8 @@ import type { FeeCatalog } from "@/lib/fees/config";
 type Props = {
   feeCatalog: FeeCatalog;
   classOptions: string[];
+  genderOptions: string[];
+  casteOptions: string[];
   studentTypeOptions: string[];
   semesterYearOptions: string[];
   currency: string;
@@ -30,6 +32,8 @@ type FeeType = "term" | "examination";
 export function FeePaymentForm({
   feeCatalog,
   classOptions,
+  genderOptions,
+  casteOptions,
   studentTypeOptions,
   semesterYearOptions,
   currency,
@@ -293,6 +297,58 @@ export function FeePaymentForm({
             />
           </div>
 
+          {/* Gender */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="gender"
+              className="text-sm font-bold text-slate-700"
+            >
+              Gender
+            </label>
+            <select
+              id="gender"
+              name="gender"
+              required
+              defaultValue=""
+              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:border-primary-800 focus:outline-none focus:ring-1 focus:ring-primary-800"
+            >
+              <option value="" disabled>
+                Select gender
+              </option>
+              {genderOptions.map((gender) => (
+                <option key={gender} value={gender}>
+                  {gender}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Caste */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="caste"
+              className="text-sm font-bold text-slate-700"
+            >
+              Caste
+            </label>
+            <select
+              id="caste"
+              name="caste"
+              required
+              defaultValue=""
+              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:border-primary-800 focus:outline-none focus:ring-1 focus:ring-primary-800"
+            >
+              <option value="" disabled>
+                Select caste
+              </option>
+              {casteOptions.map((caste) => (
+                <option key={caste} value={caste}>
+                  {caste}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Class */}
           <div className="flex flex-col gap-1.5">
             <label
@@ -418,7 +474,7 @@ export function FeePaymentForm({
               disabled={submitting}
               className="w-full rounded-xl bg-primary-900 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-primary-800 disabled:cursor-wait disabled:opacity-70 sm:w-auto sm:px-10"
             >
-              {submitting ? "Creating order…" : "Proceed to Paytm"}
+              {submitting ? "Creating order…" : "Proceed to Pay"}
             </button>
           </div>
         </form>

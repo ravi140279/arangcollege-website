@@ -76,6 +76,24 @@
       <input type="text" name="father_name" placeholder="Father's full name" required>
     </label>
     <label>
+      <span>Gender</span>
+      <select name="gender" required>
+        <option value="" selected disabled>Select gender</option>
+        {% for gender in gender_options %}
+        <option value="{{ gender }}">{{ gender }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      <span>Caste</span>
+      <select name="caste" required>
+        <option value="" selected disabled>Select caste</option>
+        {% for caste in caste_options %}
+        <option value="{{ caste }}">{{ caste }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
       <span>Class</span>
       <select name="class_name" required>
         <option value="" selected disabled>Select class</option>
@@ -110,7 +128,7 @@
       <span>Mobile Number</span>
       <input type="tel" name="phone" placeholder="10-digit mobile number" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required>
     </label>
-    <button class="primary-button" type="submit">Proceed to Paytm</button>
+    <button class="primary-button" type="submit">Proceed to Pay</button>
   </form>
 </section>
 
@@ -175,7 +193,7 @@
           notifyMerchant: function (eventName) {
             if (eventName === 'APP_CLOSED') {
               submitButton.disabled = false;
-              submitButton.textContent = 'Proceed to Paytm';
+              submitButton.textContent = 'Proceed to Pay';
             }
           }
         }
@@ -186,7 +204,7 @@
     } catch (error) {
       alert(error.message);
       submitButton.disabled = false;
-      submitButton.textContent = 'Proceed to Paytm';
+      submitButton.textContent = 'Proceed to Pay';
     }
   });
 </script>

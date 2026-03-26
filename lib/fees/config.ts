@@ -13,6 +13,10 @@ export const CLASS_OPTIONS = [
 
 export const STUDENT_TYPE_OPTIONS = ["Regular", "Private"] as const;
 
+export const GENDER_OPTIONS = ["Male", "Female"] as const;
+
+export const CASTE_OPTIONS = ["General", "SC", "ST", "OBC"] as const;
+
 export const SEMESTER_YEAR_OPTIONS = [
   "1st Semester",
   "2nd Semester",
