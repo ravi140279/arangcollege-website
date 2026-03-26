@@ -187,5 +187,10 @@
         "href": "/contact-us"
       }
     ]
+  },
+  {
+    "label": "College Fees Collection",
+    "href": "/fees",
+    "items": []
   }
 ]

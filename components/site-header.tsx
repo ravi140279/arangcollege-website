@@ -39,22 +39,33 @@ export function SiteHeader({ navGroups, collegeName, collegeSubtitle }: Props) {
                 Home
               </Link>
             </li>
-            {navGroups.map((group) => (
-              <li key={group.label} className="group relative">
-                <span className="cursor-default rounded px-2 py-1 group-hover:bg-accent-100">{group.label}</span>
-                <div className="invisible absolute right-0 top-full w-72 translate-y-1 rounded-xl border border-accent-200 bg-white p-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                  {group.items.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="block rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-900"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </li>
-            ))}
+            {navGroups.map((group) =>
+              group.href ? (
+                <li key={group.label}>
+                  <Link
+                    href={group.href}
+                    className="rounded-full border border-primary-800 bg-primary-900 px-3 py-1.5 text-sm font-bold text-white hover:bg-primary-800"
+                  >
+                    {group.label}
+                  </Link>
+                </li>
+              ) : (
+                <li key={group.label} className="group relative">
+                  <span className="cursor-default rounded px-2 py-1 group-hover:bg-accent-100">{group.label}</span>
+                  <div className="invisible absolute right-0 top-full w-72 translate-y-1 rounded-xl border border-accent-200 bg-white p-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                    {group.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="block rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-900"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </li>
+              )
+            )}
           </ul>
         </nav>
       </div>
@@ -64,21 +75,32 @@ export function SiteHeader({ navGroups, collegeName, collegeSubtitle }: Props) {
           <Link href="/" className="mb-3 block rounded px-2 py-2 font-semibold text-primary-900" onClick={() => setOpen(false)}>
             Home
           </Link>
-          {navGroups.map((group) => (
-            <div key={group.label} className="mb-4">
-              <p className="px-2 pb-1 text-xs font-bold uppercase tracking-wide text-accent-700">{group.label}</p>
-              {group.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="block rounded px-2 py-2 text-sm text-slate-800 hover:bg-primary-50"
-                  onClick={() => setOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          ))}
+          {navGroups.map((group) =>
+            group.href ? (
+              <Link
+                key={group.label}
+                href={group.href}
+                className="mb-3 block rounded-lg border border-primary-800 bg-primary-900 px-3 py-2 text-center text-sm font-bold text-white"
+                onClick={() => setOpen(false)}
+              >
+                {group.label}
+              </Link>
+            ) : (
+              <div key={group.label} className="mb-4">
+                <p className="px-2 pb-1 text-xs font-bold uppercase tracking-wide text-accent-700">{group.label}</p>
+                {group.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block rounded px-2 py-2 text-sm text-slate-800 hover:bg-primary-50"
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )
+          )}
         </div>
       ) : null}
     </header>

@@ -1,0 +1,164 @@
+import path from "path";
+import Database from "better-sqlite3";
+
+const DB_PATH = path.join(process.cwd(), "data", "fee_payments.db");
+
+function openDb(): Database.Database {
+  const db = new Database(DB_PATH);
+  db.pragma("journal_mode = WAL");
+  return db;
+}
+
+function initDb(): void {
+  const db = openDb();
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      student_id TEXT NOT NULL,
+      student_name TEXT NOT NULL,
+      father_name TEXT NOT NULL DEFAULT '',
+      class_name TEXT NOT NULL DEFAULT '',
+      student_type TEXT NOT NULL DEFAULT '',
+      semester_year TEXT NOT NULL DEFAULT '',
+      email TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      fee_type TEXT NOT NULL,
+      fee_label TEXT NOT NULL,
+      amount_rupees INTEGER NOT NULL,
+      currency TEXT NOT NULL,
+      order_id TEXT NOT NULL UNIQUE,
+      payment_id TEXT NOT NULL,
+      signature TEXT NOT NULL,
+      status TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      raw_payload TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS pending_orders (
+      order_id TEXT PRIMARY KEY,
+      student_id TEXT NOT NULL,
+      student_name TEXT NOT NULL,
+      father_name TEXT NOT NULL DEFAULT '',
+      class_name TEXT NOT NULL DEFAULT '',
+      student_type TEXT NOT NULL DEFAULT '',
+      semester_year TEXT NOT NULL DEFAULT '',
+      email TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      fee_type TEXT NOT NULL,
+      fee_label TEXT NOT NULL,
+      amount_rupees INTEGER NOT NULL,
+      currency TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+  `);
+  db.close();
+}
+
+// Initialise on module load
+initDb();
+
+export type PendingOrder = {
+  order_id: string;
+  student_id: string;
+  student_name: string;
+  father_name: string;
+  class_name: string;
+  student_type: string;
+  semester_year: string;
+  email: string;
+  phone: string;
+  fee_type: string;
+  fee_label: string;
+  amount_rupees: number;
+  currency: string;
+  created_at: string;
+};
+
+export type PaymentRecord = PendingOrder & {
+  id?: number;
+  payment_id: string;
+  signature: string;
+  status: string;
+  raw_payload: string;
+};
+
+export function upsertPendingOrder(order: PendingOrder): void {
+  const db = openDb();
+  db.prepare(`
+    INSERT INTO pending_orders (
+      order_id, student_id, student_name, father_name, class_name,
+      student_type, semester_year, email, phone, fee_type, fee_label,
+      amount_rupees, currency, created_at
+    ) VALUES (
+      @order_id, @student_id, @student_name, @father_name, @class_name,
+      @student_type, @semester_year, @email, @phone, @fee_type, @fee_label,
+      @amount_rupees, @currency, @created_at
+    )
+    ON CONFLICT(order_id) DO UPDATE SET
+      student_id = excluded.student_id,
+      student_name = excluded.student_name,
+      father_name = excluded.father_name,
+      class_name = excluded.class_name,
+      student_type = excluded.student_type,
+      semester_year = excluded.semester_year,
+      email = excluded.email,
+      phone = excluded.phone,
+      fee_type = excluded.fee_type,
+      fee_label = excluded.fee_label,
+      amount_rupees = excluded.amount_rupees,
+      currency = excluded.currency,
+      created_at = excluded.created_at
+  `).run(order);
+  db.close();
+}
+
+export function fetchPendingOrder(orderId: string): PendingOrder | undefined {
+  const db = openDb();
+  const row = db
+    .prepare("SELECT * FROM pending_orders WHERE order_id = ?")
+    .get(orderId) as PendingOrder | undefined;
+  db.close();
+  return row;
+}
+
+export function deletePendingOrder(orderId: string): void {
+  const db = openDb();
+  db.prepare("DELETE FROM pending_orders WHERE order_id = ?").run(orderId);
+  db.close();
+}
+
+export function recordPayment(payment: Omit<PaymentRecord, "id">): void {
+  const db = openDb();
+  db.prepare(`
+    INSERT INTO payments (
+      student_id, student_name, father_name, class_name, student_type,
+      semester_year, email, phone, fee_type, fee_label, amount_rupees,
+      currency, order_id, payment_id, signature, status, created_at, raw_payload
+    ) VALUES (
+      @student_id, @student_name, @father_name, @class_name, @student_type,
+      @semester_year, @email, @phone, @fee_type, @fee_label, @amount_rupees,
+      @currency, @order_id, @payment_id, @signature, @status, @created_at, @raw_payload
+    )
+  `).run(payment);
+  db.close();
+}
+
+export function fetchPayments(): PaymentRecord[] {
+  const db = openDb();
+  const rows = db
+    .prepare("SELECT * FROM payments ORDER BY created_at DESC")
+    .all() as PaymentRecord[];
+  db.close();
+  return rows;
+}
+
+export function fetchPaymentByOrderId(
+  orderId: string
+): PaymentRecord | undefined {
+  const db = openDb();
+  const row = db
+    .prepare("SELECT * FROM payments WHERE order_id = ?")
+    .get(orderId) as PaymentRecord | undefined;
+  db.close();
+  return row;
+}

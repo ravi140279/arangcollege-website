@@ -30,6 +30,7 @@ export type PageData = {
 
 export type NavGroup = {
   label: string;
+  href?: string;
   items: { label: string; href: string }[];
 };
 
